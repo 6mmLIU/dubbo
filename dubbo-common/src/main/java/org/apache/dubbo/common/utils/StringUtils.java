@@ -606,17 +606,26 @@ public final class StringUtils {
         if (str == null || str.isEmpty()) {
             return false;
         }
+        int start = 0;
+        // Allow leading '+' or '-' sign
+        if (str.charAt(0) == '-' || str.charAt(0) == '+') {
+            if (str.length() == 1) {
+                return false;
+            }
+            start = 1;
+        }
         boolean hasDot = false;
         int sz = str.length();
-        for (int i = 0; i < sz; i++) {
-            if (str.charAt(i) == '.') {
+        for (int i = start; i < sz; i++) {
+            char ch = str.charAt(i);
+            if (ch == '.') {
                 if (hasDot || !allowDot) {
                     return false;
                 }
                 hasDot = true;
                 continue;
             }
-            if (!Character.isDigit(str.charAt(i))) {
+            if (!Character.isDigit(ch)) {
                 return false;
             }
         }

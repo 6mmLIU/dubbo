@@ -318,6 +318,20 @@ class StringUtilsTest {
         assertThat(StringUtils.isNumeric("123.", true), is(true));
         assertThat(StringUtils.isNumeric(".123", true), is(true));
         assertThat(StringUtils.isNumeric("..123", true), is(false));
+
+        assertThat(StringUtils.isNumeric("-1", true), is(false));
+        assertThat(StringUtils.isNumeric("+1.23", true), is(false));
+        assertThat(StringUtils.isNumeric("-", true), is(false));
+
+        assertThat(StringUtils.isNumeric("-1", true, true), is(true));
+        assertThat(StringUtils.isNumeric("+1.23", true, true), is(true));
+        assertThat(StringUtils.isNumeric("-", true, true), is(false));
+        assertThat(StringUtils.isNumeric("+", true, true), is(false));
+        assertThat(StringUtils.isNumeric("-1", false, true), is(true));
+        assertThat(StringUtils.isNumeric("+1", false, true), is(true));
+        assertThat(StringUtils.isNumeric("+1.23", false, true), is(false));
+        assertThat(StringUtils.isNumeric(null, true, true), is(false));
+        assertThat(StringUtils.isNumeric("", true, true), is(false));
     }
 
     @Test

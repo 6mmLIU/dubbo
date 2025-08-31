@@ -603,12 +603,19 @@ public final class StringUtils {
     }
 
     public static boolean isNumeric(String str, boolean allowDot) {
+        return isNumeric(str, allowDot, false);
+    }
+
+    public static boolean isNumeric(String str, boolean allowDot, boolean allowSign) {
         if (str == null || str.isEmpty()) {
             return false;
         }
         int start = 0;
-        // Allow leading '+' or '-' sign
-        if (str.charAt(0) == '-' || str.charAt(0) == '+') {
+
+        // Allow leading '+' or '-' sign when allowSign is true
+        if (allowSign && (str.charAt(0) == '-' || str.charAt(0) == '+')) {
+
+
             if (str.length() == 1) {
                 return false;
             }

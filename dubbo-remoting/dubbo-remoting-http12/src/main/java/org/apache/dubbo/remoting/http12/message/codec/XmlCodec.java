@@ -64,6 +64,8 @@ public class XmlCodec implements HttpMessageCodec {
                 Source xmlSource = new SAXSource(newSAXParser().getXMLReader(), inputSource);
                 JAXBContext context = JAXBContext.newInstance(targetType);
                 Unmarshaller unmarshaller = context.createUnmarshaller();
+                unmarshaller.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+                unmarshaller.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
                 return unmarshaller.unmarshal(xmlSource);
             }
         } catch (HttpStatusException e) {
@@ -81,6 +83,8 @@ public class XmlCodec implements HttpMessageCodec {
         spf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
         spf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         spf.setXIncludeAware(false);
+        spf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        spf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
         return spf.newSAXParser();
     }
 

@@ -603,20 +603,33 @@ public final class StringUtils {
     }
 
     public static boolean isNumeric(String str, boolean allowDot) {
+        return isNumeric(str, allowDot, false);
+    }
+
+    public static boolean isNumeric(String str, boolean allowDot, boolean allowSign) {
         if (str == null || str.isEmpty()) {
             return false;
         }
+        int start = 0;
+        // Allow leading '+' or '-' sign when allowSign is true
+        if (allowSign && (str.charAt(0) == '-' || str.charAt(0) == '+')) {
+            if (str.length() == 1) {
+                return false;
+            }
+            start = 1;
+        }
         boolean hasDot = false;
         int sz = str.length();
-        for (int i = 0; i < sz; i++) {
-            if (str.charAt(i) == '.') {
+        for (int i = start; i < sz; i++) {
+            char ch = str.charAt(i);
+            if (ch == '.') {
                 if (hasDot || !allowDot) {
                     return false;
                 }
                 hasDot = true;
                 continue;
             }
-            if (!Character.isDigit(str.charAt(i))) {
+            if (!Character.isDigit(ch)) {
                 return false;
             }
         }

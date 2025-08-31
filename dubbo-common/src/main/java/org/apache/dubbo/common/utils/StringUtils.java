@@ -611,8 +611,10 @@ public final class StringUtils {
             return false;
         }
         int start = 0;
+
         // Allow leading '+' or '-' sign when allowSign is true
         if (allowSign && (str.charAt(0) == '-' || str.charAt(0) == '+')) {
+
             if (str.length() == 1) {
                 return false;
             }

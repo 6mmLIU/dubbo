@@ -142,8 +142,25 @@ public class LRU2Cache<K, V> extends LinkedHashMap<K, V> {
     }
 
     public void setMaxCapacity(int maxCapacity) {
-        preCache.setMaxCapacity(maxCapacity);
-        this.maxCapacity = maxCapacity;
+        lock.lock();
+        try {
+            preCache.setMaxCapacity(maxCapacity);
+            this.maxCapacity = maxCapacity;
+            trimToSize();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private void trimToSize() {
+        while (super.size() > maxCapacity) {
+            java.util.Iterator<java.util.Map.Entry<K, V>> iterator = super.entrySet().iterator();
+            if (!iterator.hasNext()) {
+                return;
+            }
+            iterator.next();
+            iterator.remove();
+        }
     }
 
     static class PreCache<K, V> extends LinkedHashMap<K, V> {
@@ -166,6 +183,18 @@ public class LRU2Cache<K, V> extends LinkedHashMap<K, V> {
 
         public void setMaxCapacity(int maxCapacity) {
             this.maxCapacity = maxCapacity;
+            trimToSize();
+        }
+
+        private void trimToSize() {
+            while (super.size() > maxCapacity) {
+                java.util.Iterator<java.util.Map.Entry<K, V>> iterator = super.entrySet().iterator();
+                if (!iterator.hasNext()) {
+                    return;
+                }
+                iterator.next();
+                iterator.remove();
+            }
         }
     }
 }

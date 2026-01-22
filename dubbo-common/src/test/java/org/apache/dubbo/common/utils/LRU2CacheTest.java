@@ -67,4 +67,23 @@ class LRU2CacheTest {
         cache.setMaxCapacity(10);
         assertThat(cache.getMaxCapacity(), equalTo(10));
     }
+
+    @Test
+    void testResizeEvictsEldestEntries() {
+        LRU2Cache<String, Integer> cache = new LRU2Cache<String, Integer>(3);
+        cache.put("one", 1);
+        cache.put("one", 1);
+        cache.put("two", 2);
+        cache.put("two", 2);
+        cache.put("three", 3);
+        cache.put("three", 3);
+
+        cache.get("one");
+        cache.setMaxCapacity(2);
+
+        assertThat(cache.size(), equalTo(2));
+        assertTrue(cache.containsKey("one"));
+        assertTrue(cache.containsKey("three"));
+        assertFalse(cache.containsKey("two"));
+    }
 }

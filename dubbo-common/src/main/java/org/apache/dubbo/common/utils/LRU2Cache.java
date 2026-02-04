@@ -42,7 +42,7 @@ public class LRU2Cache<K, V> extends LinkedHashMap<K, V> {
     private volatile int maxCapacity;
 
     // as history list
-    private final PreCache<K, Boolean> preCache;
+    private final PreCache<K, V> preCache;
 
     public LRU2Cache() {
         this(DEFAULT_MAX_CAPACITY);
@@ -89,7 +89,7 @@ public class LRU2Cache<K, V> extends LinkedHashMap<K, V> {
                 return super.put(key, value);
             } else {
                 // add it to history list
-                preCache.put(key, true);
+                preCache.put(key, value);
                 return value;
             }
         } finally {
@@ -99,12 +99,41 @@ public class LRU2Cache<K, V> extends LinkedHashMap<K, V> {
 
     @Override
     public V computeIfAbsent(K key, Function<? super K, ? extends V> fn) {
-        V value = get(key);
-        if (value == null) {
-            value = fn.apply(key);
-            put(key, value);
+        V cachedValue;
+        lock.lock();
+        try {
+            if (super.containsKey(key)) {
+                return super.get(key);
+            }
+            if (preCache.containsKey(key)) {
+                cachedValue = preCache.remove(key);
+                super.put(key, cachedValue);
+                return cachedValue;
+            }
+        } finally {
+            lock.unlock();
         }
-        return value;
+
+        V computedValue = fn.apply(key);
+        if (computedValue == null) {
+            return null;
+        }
+
+        lock.lock();
+        try {
+            if (super.containsKey(key)) {
+                return super.get(key);
+            }
+            if (preCache.containsKey(key)) {
+                cachedValue = preCache.remove(key);
+                super.put(key, cachedValue);
+                return cachedValue;
+            }
+            preCache.put(key, computedValue);
+            return computedValue;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override

@@ -18,6 +18,8 @@ package org.apache.dubbo.common.utils;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -121,5 +123,20 @@ class LRU2CacheTest {
         cache.get("5");
 
         assertTrue(cache.size() <= 2);
+    }
+
+    @Test
+    void testComputeIfAbsentPromotesFromPreCache() {
+        LRU2Cache<String, Integer> cache = new LRU2Cache<>(3);
+        AtomicInteger counter = new AtomicInteger();
+
+        Integer first = cache.computeIfAbsent("one", key -> counter.incrementAndGet());
+        assertThat(first, equalTo(1));
+        assertFalse(cache.containsKey("one"));
+
+        Integer second = cache.computeIfAbsent("one", key -> counter.incrementAndGet());
+        assertThat(second, equalTo(1));
+        assertTrue(cache.containsKey("one"));
+        assertThat(counter.get(), equalTo(1));
     }
 }

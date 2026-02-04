@@ -26,6 +26,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.apache.dubbo.remoting.http12.exception.DecodeException;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @EnabledOnOs(OS.LINUX)
 public class XmlSafetyTest {
@@ -44,40 +46,34 @@ public class XmlSafetyTest {
 
     @Test
     void testSafe1() {
-        try {
-            InputStream in = new ByteArrayInputStream(("<xml>\n" + "  <dynamic-proxy>\n"
-                            + "    <interface>java.util.List</interface>\n"
-                            + "    <handler class=\"java.beans.EventHandler\">\n"
-                            + "      <target class=\"java.lang.ProcessBuilder\">\n"
-                            + "        <command>\n"
-                            + "          <string>" + "sleep" + "</string>\n"
-                            + "          <string>" + "60" + "</string>\n"
-                            + "        </command>\n"
-                            + "      </target>\n"
-                            + "      <action>start</action>\n"
-                            + "    </handler>\n"
-                            + "  </dynamic-proxy>\n"
-                            + "</xml>")
-                    .getBytes());
-            new XmlCodec().decode(in, Object.class);
-        } catch (Exception e) {
-        }
+        InputStream in = new ByteArrayInputStream(("<xml>\n" + "  <dynamic-proxy>\n"
+                        + "    <interface>java.util.List</interface>\n"
+                        + "    <handler class=\"java.beans.EventHandler\">\n"
+                        + "      <target class=\"java.lang.ProcessBuilder\">\n"
+                        + "        <command>\n"
+                        + "          <string>" + "sleep" + "</string>\n"
+                        + "          <string>" + "60" + "</string>\n"
+                        + "        </command>\n"
+                        + "      </target>\n"
+                        + "      <action>start</action>\n"
+                        + "    </handler>\n"
+                        + "  </dynamic-proxy>\n"
+                        + "</xml>")
+                .getBytes());
+        assertThrows(DecodeException.class, () -> new XmlCodec().decode(in, Object.class));
     }
 
     @Test
     void testSafe2() {
-        try {
-            InputStream in = new ByteArrayInputStream(("<java>\n" + "  <object class=\"java.lang.Runtime\">\n"
-                            + "    <void method=\"exec\">\n"
-                            + "      <string>" + "sleep" + "</string>\n"
-                            + "      <string>" + "60" + "</string>\n"
-                            + "    </void>\n"
-                            + "  </object>\n"
-                            + "</java>")
-                    .getBytes());
-            new XmlCodec().decode(in, Object.class);
-        } catch (Exception e) {
-        }
+        InputStream in = new ByteArrayInputStream(("<java>\n" + "  <object class=\"java.lang.Runtime\">\n"
+                        + "    <void method=\"exec\">\n"
+                        + "      <string>" + "sleep" + "</string>\n"
+                        + "      <string>" + "60" + "</string>\n"
+                        + "    </void>\n"
+                        + "  </object>\n"
+                        + "</java>")
+                .getBytes());
+        assertThrows(DecodeException.class, () -> new XmlCodec().decode(in, Object.class));
     }
 
     static class ProcessChecker {

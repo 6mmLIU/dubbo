@@ -26,6 +26,7 @@ import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.Source;
@@ -58,6 +59,9 @@ public class XmlCodec implements HttpMessageCodec {
     @Override
     public Object decode(InputStream is, Class<?> targetType, Charset charset) throws DecodeException {
         try {
+            if (targetType == Object.class || !targetType.isAnnotationPresent(XmlRootElement.class)) {
+                throw new DecodeException("Target type " + targetType.getName() + " is not allowed for xml deserialization");
+            }
             try (InputStreamReader reader = new InputStreamReader(is, charset)) {
                 InputSource inputSource = new InputSource(reader);
                 inputSource.setEncoding(charset.name());
@@ -81,7 +85,10 @@ public class XmlCodec implements HttpMessageCodec {
         spf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
         spf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         spf.setXIncludeAware(false);
-        return spf.newSAXParser();
+        SAXParser saxParser = spf.newSAXParser();
+        saxParser.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        saxParser.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        return saxParser;
     }
 
     @Override
